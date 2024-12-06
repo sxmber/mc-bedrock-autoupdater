@@ -7,15 +7,20 @@ import (
 	"regexp"
 	"strings"
 	"os"
+	"os/exec"
 	"log"
 	"time"
 	"fmt"
+	"strconv"
+	"syscall"
 	
 )
 
 func updateServer(latestVersZip string, homeDir string) {
 	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-" + latestVersZip
 	client := &http.Client{}
+
+	fmt.Println("Requesting to download server file...")
 	//Request the latest server file
 	req, err := http.NewRequest("GET", serverURL, nil)
 		if err != nil {
@@ -36,7 +41,8 @@ func updateServer(latestVersZip string, homeDir string) {
     } 
 
 	fmt.Println("status", resp.Status)
-    //create the file and then write its content to disk
+	fmt.Println("Writing new server to disk")
+    //create the new file and then write its content to disk
 	serverFile, err := os.Create(homeDir + "/bedrock-server-" + latestVersZip)
 	if err != nil {
 		log.Fatal(err)
@@ -46,13 +52,52 @@ func updateServer(latestVersZip string, homeDir string) {
 
 	//TODO
 	//Backup the running "bedrock-server"
-	//stop the minecraft server?
+	//stop the minecraft server? *pidof bedrock_server
 	//Add logic to install new server:
 	//	Delete running server, unzip the latest version into "bedrock-server"
 	//	copy server.properties, worlds, permission.json and allowlist.json, recursively!!! from the backup and into the new bedrock-server
 	//	delete the latest .zip
 	//	Run the bedrock server with screen.
 	//	Log that the server was updated sucessfully
+
+	fmt.Println("Backing up current server")
+	t := time.Now()
+	timeF := t.Format("01-02-2006")
+	cmd := exec.Command("cp", "--recursive", homeDir + "/bedrock-server", homeDir + "/bedrock-server-backup-" + timeF)
+	cmd.Run()
+	
+	fmt.Println("Killing server...")
+	pid, err := exec.Command("pidof", "bedrock_server").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//converting pid from byteslice to int...
+	pidstr := strings.TrimSpace(string(pid))
+	fmt.Println(pidstr)
+	
+	pidint, err := strconv.Atoi(pidstr)
+	fmt.Println("PID:", pidint)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Find process and kill it
+	process, err := os.FindProcess(pidint)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = process.Signal(syscall.SIGTERM)
+	if err != nil {
+		log.Fatal("Error sending signal", err)
+	}
+
+	// out1, err := exec.Command("kill", string(out)).Output()
+	// if err != nil {
+	// 	log.Fatal("error: ", err)
+	// }
+	
+	// fmt.Println(out1)
 }
 
 
