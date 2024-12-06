@@ -1,13 +1,15 @@
 package main
 
 import (
-	"fmt"
+	
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
 	"os"
 	"log"
+	"time"
+	
 )
 
 func checkForUpdates(){
@@ -44,7 +46,19 @@ func checkForUpdates(){
 	}
 	
 	if latestVersion == string(installedVers) {
-		fmt.Println("same version")
+		//open the log file, append the status then close it
+		f, err := os.OpenFile(homeDir + "/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+		t := time.Now()
+		
+		if _, err := f.WriteString(t.String()); err != nil {log.Fatal(err)}
+		if _, err := f.WriteString(" - Latest version installed: " + latestVersion); err != nil {log.Fatal(err)}
+		if _, err := f.WriteString("\n"); err != nil {log.Fatal(err)}
+		if err := f.Close(); err != nil {log.Fatal(err)}
+		
+		
 	} 
 }
 
