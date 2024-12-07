@@ -27,7 +27,6 @@ func updateServer(latestVersZip string, homeDir string) {
 			log.Fatal(err)
 		}
 	
-
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
 	
 	resp, err := client.Do(req)
@@ -63,7 +62,10 @@ func updateServer(latestVersZip string, homeDir string) {
 	fmt.Println("Backing up current server")
 	t := time.Now()
 	timeF := t.Format("01-02-2006")
-	cmd := exec.Command("cp", "--recursive", homeDir + "/bedrock-server", homeDir + "/bedrock-server-backup-" + timeF)
+	backupDir := homeDir + "/bedrock-server-backup-" + timeF //change to wherever if needed
+	bedrockServerDir := homeDir + "/bedrock-server"
+
+	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 	
 	fmt.Println("Killing server...")
@@ -71,9 +73,8 @@ func updateServer(latestVersZip string, homeDir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//converting pid from byteslice to int...
+	//converting pid from byte slice to int...
 	pidstr := strings.TrimSpace(string(pid))
-	fmt.Println(pidstr)
 	
 	pidint, err := strconv.Atoi(pidstr)
 	fmt.Println("PID:", pidint)
@@ -92,16 +93,14 @@ func updateServer(latestVersZip string, homeDir string) {
 		log.Fatal("Error sending signal", err)
 	}
 
-	// out1, err := exec.Command("kill", string(out)).Output()
-	// if err != nil {
-	// 	log.Fatal("error: ", err)
-	// }
-	
-	// fmt.Println(out1)
+	fmt.Println("Deleting current bedrock server directory")
+	err = os.RemoveAll("/home/steve/bedrock-server-backup-1") //change to bedrockServerDir
+	if err != nil {
+		log.Fatal("Error deleting bedrock directory: ", err)
+	}
+
 }
-
-
-func checkForUpdates(){
+func checkForUpdates() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
