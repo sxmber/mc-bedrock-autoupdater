@@ -130,11 +130,17 @@ func updateServer(latestVersZip string, homeDir string) {
 	//Run the new bedrock server
 
 	fmt.Println("Attemping to run the bedrock server...")
-	fmt.Println(bedrockServerDir)
-	cmd = exec.Command("screen", bedrockServerDir+"/./bedrock_server")
+	err = os.Chdir(bedrockServerDir)
+	if err != nil {
+		log.Fatal("Error changing directory to bedrock-server:", err)
+	}
+
+	cmd = exec.Command("screen", "-dmS", "bedrock_server_session", "./bedrock_server")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	err = cmd.Run()
 	if err != nil {
-		log.Fatal("Error running the bedrock server", err)
+		log.Fatal("Error running the bedrock server:", err)
 	}
 	fmt.Println("Bedrock server started successfully")
 
