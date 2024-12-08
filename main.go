@@ -46,9 +46,9 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	fmt.Println("status", resp.Status)
-	fmt.Println("Writing new server to disk")
-	//create the new file and then write its content to disk
 
+	//create the new file and then write its content to disk
+	fmt.Println("Writing new server to disk")
 	serverFile, err := os.Create(homeDir + "/" + latestVersZip)
 	if err != nil {
 		log.Fatal(err)
@@ -58,6 +58,7 @@ func updateServer(latestVersZip string, homeDir string) {
 		log.Fatal(err)
 	}
 
+	//Backup the current server
 	fmt.Println("Backing up current server")
 	t := time.Now()
 	timeF := t.Format("01-02-2006")
@@ -67,6 +68,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 
+	//Kill the running server
 	fmt.Println("Killing server...")
 	pid, err := exec.Command("pidof", "bedrock_server").Output()
 	if err != nil {
@@ -182,11 +184,10 @@ func checkForUpdates() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	log.SetOutput(f)
 
-	client := &http.Client{}
 	//Send GET request with user headers(Request won't work without headers set)
+	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://www.minecraft.net/en-us/download/server/bedrock", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -208,7 +209,7 @@ func checkForUpdates() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//regex to find latest version in the body
+	//regex to find latest version in the response body
 	latestVersionZipRegex := regexp.MustCompile(`bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
 	latestVersionZip := latestVersionZipRegex.FindString(string(body))
 	if latestVersionZip == "" {
@@ -220,6 +221,9 @@ func checkForUpdates() {
 	installedVers, err := os.ReadFile(homeDir + "/mc-bedrock-autoupdater/vers.txt")
 	if err != nil {
 		log.Fatal(err)
+	}
+	if string(installedVers) == "" {
+		log.Fatal("Set the installed minecraft version in vers.txt", err)
 	}
 
 	//Check if the bedrock server needs to be updated and log it to the log.txt file
