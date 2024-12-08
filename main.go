@@ -15,6 +15,7 @@ import (
 func updateServer(latestVersZip string, homeDir string) {
 	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/" + latestVersZip
 	client := &http.Client{}
+	latestVersTrim := strings.TrimSuffix(strings.TrimPrefix(latestVersZip, "bedrock-server-"), ".zip")
 
 	fmt.Println("Requesting to download server file...")
 	//Request the latest server file
@@ -144,6 +145,25 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 	fmt.Println("Bedrock server started successfully")
 
+	//Log that the server updated successfully
+	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal("Error opening log file", err)
+	}
+
+	if _, err := f.WriteString(t.String()); err != nil {
+		log.Fatal(err)
+	}
+	if _, err := f.WriteString(" - Bedrock server updated successfully: " + latestVersTrim); err != nil {
+		log.Fatal(err)
+	}
+	if _, err := f.WriteString("\n"); err != nil {
+		log.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		log.Fatal(err)
+	}
+
 }
 func checkForUpdates() {
 	homeDir, err := os.UserHomeDir()
@@ -198,7 +218,7 @@ func checkForUpdates() {
 		if _, err := f.WriteString(t.String()); err != nil {
 			log.Fatal(err)
 		}
-		if _, err := f.WriteString(" - Latest version installed: " + latestVersion); err != nil {
+		if _, err := f.WriteString(" - Bedrock server is up to date: " + latestVersion); err != nil {
 			log.Fatal(err)
 		}
 		if _, err := f.WriteString("\n"); err != nil {
