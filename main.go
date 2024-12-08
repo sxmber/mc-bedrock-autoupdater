@@ -18,15 +18,16 @@ func updateServer(latestVersZip string, homeDir string) {
 	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/" + latestVersZip
 	client := &http.Client{}
 	latestVersTrim := strings.TrimSuffix(strings.TrimPrefix(latestVersZip, "bedrock-server-"), ".zip")
+
+	//Set the logger to send errors to log.txt
 	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal("Error opening log file", err)
 	}
-
 	log.SetOutput(f)
 
-	fmt.Println("Requesting to download server file...")
 	//Request the latest server file
+	fmt.Println("Requesting to download server file...")
 	req, err := http.NewRequest("GET", serverURL, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -56,16 +57,6 @@ func updateServer(latestVersZip string, homeDir string) {
 	if _, err := io.Copy(serverFile, resp.Body); err != nil {
 		log.Fatal(err)
 	}
-
-	//TODO
-	//Backup the running "bedrock-server"
-	//stop the minecraft server? *pidof bedrock_server
-	//Add logic to install new server:
-	//	Delete running server, unzip the latest version into "bedrock-server"
-	//	copy server.properties, worlds, permission.json and allowlist.json, recursively!!! from the backup and into the new bedrock-server
-	//	delete the latest .zip
-	//	Run the bedrock server with screen.
-	//	Log that the server was updated sucessfully
 
 	fmt.Println("Backing up current server")
 	t := time.Now()
@@ -153,7 +144,6 @@ func updateServer(latestVersZip string, homeDir string) {
 	fmt.Println("Bedrock server started successfully")
 
 	//Log that the server updated successfully
-
 	if _, err := f.WriteString(t.String()); err != nil {
 		log.Fatal(err)
 	}
@@ -167,12 +157,34 @@ func updateServer(latestVersZip string, homeDir string) {
 		log.Fatal(err)
 	}
 
+	//Update the current version in vers.txt
+	f, err = os.OpenFile(homeDir+"/mc-bedrock-autoupdater/vers.txt", os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal("Error opening the version file", err)
+	}
+
+	if _, err := f.WriteString(latestVersTrim); err != nil {
+		log.Fatal("Error updating vers.txt file: ", err)
+	}
+
+	if err := f.Close(); err != nil {
+		log.Fatal("Error closing the version file")
+	}
+
 }
 func checkForUpdates() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
+		log.Fatal("Error getting the user home directory", err)
+	}
+	//open the log file and set the logger to it
+	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.SetOutput(f)
+
 	client := &http.Client{}
 	//Send GET request with user headers(Request won't work without headers set)
 	req, err := http.NewRequest("GET", "https://www.minecraft.net/en-us/download/server/bedrock", nil)
@@ -210,13 +222,8 @@ func checkForUpdates() {
 		log.Fatal(err)
 	}
 
+	//Check if the bedrock server needs to be updated and log it to the log.txt file
 	if latestVersion == string(installedVers) {
-		//open the log file, append the status then close it
-		f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		t := time.Now()
 		if _, err := f.WriteString(t.String()); err != nil {
 			log.Fatal(err)
