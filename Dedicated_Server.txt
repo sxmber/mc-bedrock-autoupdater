@@ -1,0 +1,11 @@
+Dedicated_Server.txt
+[2024-12-07 22:22:42:106 INFO] Starting Server
+[2024-12-07 22:22:42:106 INFO] Version: 1.21.50.10
+[2024-12-07 22:22:42:106 INFO] Session ID: f723ae73-157b-49f1-bf4c-5e1392083513
+[2024-12-07 22:22:42:106 INFO] Build ID: 29566757
+[2024-12-07 22:22:42:106 INFO] Branch: r/21_u5
+[2024-12-07 22:22:42:106 INFO] Commit ID: 37da48010fdedb1b893d3a320c89e753f5b23a1b
+[2024-12-07 22:22:42:106 INFO] Configuration: Publish
+[2024-12-07 22:22:42:107 ERROR] Error reading file: server.properties
+[2024-12-07 22:22:42:107 ERROR] Could not load server.properties file, Please check if the current working directory is the same as the bedrock_server directory.
+[2024-12-07 22:22:42:107 INFO] Server stop requested.

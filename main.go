@@ -8,9 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -40,7 +38,8 @@ func updateServer(latestVersZip string, homeDir string) {
 	fmt.Println("status", resp.Status)
 	fmt.Println("Writing new server to disk")
 	//create the new file and then write its content to disk
-	serverFile, err := os.Create(homeDir + "/bedrock-server-" + latestVersZip)
+
+	serverFile, err := os.Create(homeDir + "/" + latestVersZip)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,30 +67,30 @@ func updateServer(latestVersZip string, homeDir string) {
 	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 
-	fmt.Println("Killing server...")
-	pid, err := exec.Command("pidof", "bedrock_server").Output()
-	if err != nil {
-		log.Fatal("Error killing the server, maybe its not running? ", err)
-	}
-	//converting pid from byte slice to int...
-	pidstr := strings.TrimSpace(string(pid))
+	// fmt.Println("Killing server...")
+	// pid, err := exec.Command("pidof", "bedrock_server").Output()
+	// if err != nil {
+	// 	log.Fatal("Error killing the server, maybe its not running? ", err)
+	// }
+	// //converting pid from byte slice to int...
+	// pidstr := strings.TrimSpace(string(pid))
 
-	pidint, err := strconv.Atoi(pidstr)
-	fmt.Println("PID:", pidint)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// pidint, err := strconv.Atoi(pidstr)
+	// fmt.Println("PID:", pidint)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	//Find process and kill it
-	process, err := os.FindProcess(pidint)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// //Find process and kill it
+	// process, err := os.FindProcess(pidint)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = process.Signal(syscall.SIGTERM)
-	if err != nil {
-		log.Fatal("Error sending signal", err)
-	}
+	// err = process.Signal(syscall.SIGTERM)
+	// if err != nil {
+	// 	log.Fatal("Error sending signal", err)
+	// }
 
 	//Delete the current bedrock dir..
 	fmt.Println("Deleting current bedrock server directory")
@@ -104,25 +103,40 @@ func updateServer(latestVersZip string, homeDir string) {
 	//unzip the new server version into a new bedrock-server directory
 	fmt.Println("Unzipping new server into a new bedrock-server directory")
 
+	err = os.Mkdir(bedrockServerDir, 0777)
+	if err != nil {
+		log.Fatal("Error creating new bedrock server directory: ", err)
+	}
+
 	cmd = exec.Command("unzip", latestServerDir, "-d", bedrockServerDir)
+
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal("Error unzipping, is the zip in the right directory?", err)
 	}
 
 	//copy important directories to the new bedrock-server
+	fmt.Println(backupDir)
 	fmt.Println("Coping files from backup directory")
 	cmd = exec.Command("cp", "-r", backupDir+"/worlds", backupDir+"/server.properties", backupDir+"/permission.json", backupDir+"/allowlist.json", bedrockServerDir)
-	out, err := cmd.Output()
-	if err != nil {
-		log.Fatalf("Error copying from the backup directory: %v\nOutput: %s", err, string(out))
-	}
+	cmd.Run()
 
-	//Deleting downloaded bedrock zip
+	//Deleting the downloaded bedrock zip
 	err = os.RemoveAll(latestServerDir)
 	if err != nil {
 		log.Fatal("Error deleting downloaded bedrock directory: ", err)
 	}
+
+	//Run the new bedrock server
+
+	fmt.Println("Attemping to run the bedrock server...")
+	fmt.Println(bedrockServerDir)
+	cmd = exec.Command("screen", bedrockServerDir+"/./bedrock_server")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal("Error running the bedrock server", err)
+	}
+	fmt.Println("Bedrock server started successfully")
 
 }
 func checkForUpdates() {
