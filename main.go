@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -16,6 +18,12 @@ func updateServer(latestVersZip string, homeDir string) {
 	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/" + latestVersZip
 	client := &http.Client{}
 	latestVersTrim := strings.TrimSuffix(strings.TrimPrefix(latestVersZip, "bedrock-server-"), ".zip")
+	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal("Error opening log file", err)
+	}
+
+	log.SetOutput(f)
 
 	fmt.Println("Requesting to download server file...")
 	//Request the latest server file
@@ -68,30 +76,30 @@ func updateServer(latestVersZip string, homeDir string) {
 	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 
-	// fmt.Println("Killing server...")
-	// pid, err := exec.Command("pidof", "bedrock_server").Output()
-	// if err != nil {
-	// 	log.Fatal("Error killing the server, maybe its not running? ", err)
-	// }
-	// //converting pid from byte slice to int...
-	// pidstr := strings.TrimSpace(string(pid))
+	fmt.Println("Killing server...")
+	pid, err := exec.Command("pidof", "bedrock_server").Output()
+	if err != nil {
+		log.Fatal("Error killing the server, maybe its not running? ", err)
+	}
+	//converting pid from byte slice to int...
+	pidstr := strings.TrimSpace(string(pid))
 
-	// pidint, err := strconv.Atoi(pidstr)
-	// fmt.Println("PID:", pidint)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	pidint, err := strconv.Atoi(pidstr)
+	fmt.Println("PID:", pidint)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// //Find process and kill it
-	// process, err := os.FindProcess(pidint)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	//Find process and kill it
+	process, err := os.FindProcess(pidint)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// err = process.Signal(syscall.SIGTERM)
-	// if err != nil {
-	// 	log.Fatal("Error sending signal", err)
-	// }
+	err = process.Signal(syscall.SIGTERM)
+	if err != nil {
+		log.Fatal("Error sending signal", err)
+	}
 
 	//Delete the current bedrock dir..
 	fmt.Println("Deleting current bedrock server directory")
@@ -117,7 +125,6 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	//copy important directories to the new bedrock-server
-	fmt.Println(backupDir)
 	fmt.Println("Coping files from backup directory")
 	cmd = exec.Command("cp", "-r", backupDir+"/worlds", backupDir+"/server.properties", backupDir+"/permission.json", backupDir+"/allowlist.json", bedrockServerDir)
 	cmd.Run()
@@ -146,15 +153,11 @@ func updateServer(latestVersZip string, homeDir string) {
 	fmt.Println("Bedrock server started successfully")
 
 	//Log that the server updated successfully
-	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal("Error opening log file", err)
-	}
 
 	if _, err := f.WriteString(t.String()); err != nil {
 		log.Fatal(err)
 	}
-	if _, err := f.WriteString(" - Bedrock server updated successfully: " + latestVersTrim); err != nil {
+	if _, err := f.WriteString(" - Bedrock server updated successfully to: " + latestVersTrim); err != nil {
 		log.Fatal(err)
 	}
 	if _, err := f.WriteString("\n"); err != nil {
