@@ -17,7 +17,7 @@ import (
 )
 
 func updateServer(latestVersZip string, homeDir string) {
-	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-" + latestVersZip
+	serverURL := "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/" + latestVersZip
 	client := &http.Client{}
 
 	fmt.Println("Requesting to download server file...")
@@ -64,14 +64,14 @@ func updateServer(latestVersZip string, homeDir string) {
 	timeF := t.Format("01-02-2006")
 	backupDir := homeDir + "/bedrock-server-backup-" + timeF //change to wherever if needed
 	bedrockServerDir := homeDir + "/bedrock-server"
-
+	latestServerDir := homeDir + "/" + latestVersZip
 	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 	
 	fmt.Println("Killing server...")
 	pid, err := exec.Command("pidof", "bedrock_server").Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error killing the server, maybe its not running? ", err)
 	}
 	//converting pid from byte slice to int...
 	pidstr := strings.TrimSpace(string(pid))
@@ -93,10 +93,21 @@ func updateServer(latestVersZip string, homeDir string) {
 		log.Fatal("Error sending signal", err)
 	}
 
+	//Delete the current bedrock dir..
 	fmt.Println("Deleting current bedrock server directory")
-	err = os.RemoveAll("/home/steve/bedrock-server-backup-1") //change to bedrockServerDir
+
+	err = os.RemoveAll(bedrockServerDir) 
 	if err != nil {
 		log.Fatal("Error deleting bedrock directory: ", err)
+	}
+
+	//unzip the new server version into a new bedrock-server directory
+	fmt.Println("Unzipping new server into a new bedrock-server directory")
+	
+	cmd = exec.Command("unzip", latestServerDir, "-d", "/home/steve/bedrock-server")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal("Error unzipping, is the zip in the right directory?", err)
 	}
 
 }
@@ -129,13 +140,13 @@ func checkForUpdates() {
 		log.Fatal(err)
 	}
 	//regex to find latest version in the body
-	latestVersionZipRegex := regexp.MustCompile(`\d*\.*\d*\.\d*\.\d*\.zip`)
+	latestVersionZipRegex := regexp.MustCompile(`bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
 	latestVersionZip := latestVersionZipRegex.FindString(string(body))
 	if latestVersionZip == "" {
 		log.Fatal("Could not find the latest version zip in the response")
 	}
-
-	latestVersion := strings.TrimSuffix(latestVersionZip, ".zip")
+	
+	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "bedrock-server-"), ".zip")
 	
 	installedVers, err := os.ReadFile(homeDir + "/mc-bedrock-autoupdater/vers.txt")
 	if(err != nil){
