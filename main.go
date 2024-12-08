@@ -96,7 +96,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	//Delete the current bedrock dir..
 	fmt.Println("Deleting current bedrock server directory")
 
-	err = os.RemoveAll(bedrockServerDir) 
+	err = os.RemoveAll(bedrockServerDir)
 	if err != nil {
 		log.Fatal("Error deleting bedrock directory: ", err)
 	}
@@ -104,10 +104,18 @@ func updateServer(latestVersZip string, homeDir string) {
 	//unzip the new server version into a new bedrock-server directory
 	fmt.Println("Unzipping new server into a new bedrock-server directory")
 	
-	cmd = exec.Command("unzip", latestServerDir, "-d", "/home/steve/bedrock-server")
+	cmd = exec.Command("unzip", latestServerDir, "-d", bedrockServerDir)
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal("Error unzipping, is the zip in the right directory?", err)
+	}
+
+	//copy important directories to the new bedrock-server
+	fmt.Println("Coping files from backup directory")
+	cmd = exec.Command("cp", "-r", backupDir + "/worlds", backupDir + "/server.properties", backupDir + "/permission.json", backupDir + "/allowlist.json", bedrockServerDir) 
+	out, err := cmd.Output()
+	if err != nil {
+    log.Fatalf("Error copying from the backup directory: %v\nOutput: %s", err, string(out))
 	}
 
 }
