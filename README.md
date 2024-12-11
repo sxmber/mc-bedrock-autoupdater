@@ -8,6 +8,8 @@ Golang
 
 Linux
 
+An existing Minecraft Bedrock Server in your home directory
+
 # Installation
 
   1. **Install golang**
