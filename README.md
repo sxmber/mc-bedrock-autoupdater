@@ -1,7 +1,7 @@
 # mc-bedrock-autoupdater
 Program to automate the process of updating Minecraft Bedrock Edition Server
 
-I'm working on making this more accessible but for now this script assumes your /bedrock-server and this repo is in your home directory.
+I'm working on making this more accessible but for now this script assumes your /bedrock-server and this repo is in your home directory and you have installed Golang.
 
 # Requirements
 Golang
