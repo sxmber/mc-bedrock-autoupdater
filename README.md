@@ -13,7 +13,7 @@ I'm working on making this more accessible but for now this script assumes your 
 
 # cd into the repo and build the golang binary
 
-``` go build  ```
+``` cd /mc-bedrock-autoupdater && go build  ```
 
 # Write the latest bedrock server version installed into vers.txt
 
