@@ -1,14 +1,1 @@
-2025/05/22 20:26:36 Error killing the server, maybe its not running? exit status 1
-2025-05-22 20:27:55.193511224 -0700 MST m=+1.511852028 - Bedrock server updated successfully to: 1.21.83.1
-2025/05/22 20:51:27 bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip
-2025/05/22 20:51:53 bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip
-2025/05/22 20:53:02 bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip
-2025-05-22 20:53:37.144324834 -0700 MST m=+1.608034252 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 20:54:45.310162021 -0700 MST m=+1.635370438 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 20:56:58.251548454 -0700 MST m=+1.718983143 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 20:58:30.848967294 -0700 MST m=+1.510590010 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 20:59:32.551305706 -0700 MST m=+1.438723620 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 21:00:32.447726086 -0700 MST m=+1.525509899 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 21:13:29.789978053 -0700 MST m=+1.509998329 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 21:32:39.390903091 -0700 MST m=+1.707336988 - Bedrock server updated successfully to: 1.21.83.1
-2025-05-22 21:32:55.586284963 -0700 MST m=+0.453093143 - Bedrock server is up to date: 1.21.83.1
+
