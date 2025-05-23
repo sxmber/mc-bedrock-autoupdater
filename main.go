@@ -120,7 +120,10 @@ func updateServer(latestVersZip string, homeDir string) {
 	//copy important directories to the new bedrock-server
 	fmt.Println("Coping files from backup directory")
 	cmd = exec.Command("cp", "-r", backupDir+"/worlds", backupDir+"/server.properties", backupDir+"/permission.json", backupDir+"/allowlist.json", bedrockServerDir)
-	cmd.Run()
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal("Error copying from backup directory")
+	}
 
 	//Deleting the downloaded bedrock zip
 	err = os.RemoveAll(latestServerDir)
