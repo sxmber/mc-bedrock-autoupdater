@@ -29,10 +29,10 @@ chmod +x initial.sh
 ./initial.sh
 ```
 
-  4. **Build the golang binary**
+  4. **Install the golang binary**
 
 ```console 
-cd mc-bedrock-autoupdater && go build
+go install
 ```
 
   5. **Write your Minecraft Bedrock Server into ~/mc-be-logs/vers.txt**
@@ -40,6 +40,6 @@ cd mc-bedrock-autoupdater && go build
 6. **Run the binary manually OR configure a cronjob to do it automatically**
 
 ```console
-./mc-bedrock-autoupdater
+~/go/bin/mc-bedrock-autoupdater
 
 
