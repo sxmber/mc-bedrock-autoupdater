@@ -204,7 +204,7 @@ func checkForUpdates() {
 
 	//Send GET request with user headers(Request won't work without headers set)
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://www.minecraft.net/en-us/download/server/bedrock", nil)
+	req, err := http.NewRequest("GET", "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -226,13 +226,13 @@ func checkForUpdates() {
 		log.Fatal(err)
 	}
 	//regex to find latest version in the response body
-	latestVersionZipRegex := regexp.MustCompile(`bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
+	latestVersionZipRegex := regexp.MustCompile(`/bin-linux/bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
 	latestVersionZip := latestVersionZipRegex.FindString(string(body))
 	if latestVersionZip == "" {
 		log.Fatal("Could not find the latest version zip in the response")
 	}
 
-	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "bedrock-server-"), ".zip")
+	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "/bin-linux/bedrock-server-"), ".zip")
 	installedVers, err := os.ReadFile(homeDir + "/mc-be-logs/vers.txt")
 	if err != nil {
 		log.Fatal(err)
