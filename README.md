@@ -29,7 +29,7 @@ chmod +x initial.sh
 ./initial.sh
 ```
 
-  4. **cd into the repo and build the golang binary**
+  4. **Build the golang binary**
 
 ```console 
 cd mc-bedrock-autoupdater && go build
