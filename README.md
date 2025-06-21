@@ -21,16 +21,23 @@ An existing Minecraft Bedrock Server in your home directory
 ```console
 git clone https://github.com/sxmber/mc-bedrock-autoupdater
 ```
+  3. **Run the initial.sh script**
 
-  3. **cd into the repo and build the golang binary**
+```console
+cd mc-bedrock-autoupdater
+chmod +x initial.sh
+./initial.sh
+```
+
+  4. **cd into the repo and build the golang binary**
 
 ```console 
 cd mc-bedrock-autoupdater && go build
 ```
 
-  4. **Write the latest bedrock server version installed into vers.txt**
+  5. **Write your Minecraft Bedrock Server into ~/mc-be-logs/vers.txt**
 
-5. **Run the binary manually OR configure a cronjob to do it automatically**
+6. **Run the binary manually OR configure a cronjob to do it automatically**
 
 ```console
 ./mc-bedrock-autoupdater
