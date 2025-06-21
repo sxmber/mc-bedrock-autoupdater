@@ -46,9 +46,9 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	fmt.Println("status", resp.Status)
-	fmt.Println("Writing new server to disk")
-	//create the new file and then write its content to disk
 
+	//create the new file and then write its content to disk
+	fmt.Println("Writing new server to disk")
 	serverFile, err := os.Create(homeDir + "/" + latestVersZip)
 	if err != nil {
 		log.Fatal(err)
@@ -58,6 +58,7 @@ func updateServer(latestVersZip string, homeDir string) {
 		log.Fatal(err)
 	}
 
+	//Backup the current server
 	fmt.Println("Backing up current server")
 	t := time.Now()
 	timeF := t.Format("01-02-2006")
@@ -67,6 +68,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	cmd := exec.Command("cp", "--recursive", bedrockServerDir, backupDir)
 	cmd.Run()
 
+	//Kill the running server
 	fmt.Println("Killing server...")
 	pid, err := exec.Command("pidof", "bedrock_server").Output()
 	if err != nil {
@@ -116,9 +118,24 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	//copy important directories to the new bedrock-server
-	fmt.Println("Coping files from backup directory")
-	cmd = exec.Command("cp", "-r", backupDir+"/worlds", backupDir+"/server.properties", backupDir+"/permission.json", backupDir+"/allowlist.json", bedrockServerDir)
-	cmd.Run()
+	fmt.Println("Copying files from backup directory")
+	cmd = exec.Command("cp", "-r", backupDir+"/worlds", backupDir+"/server.properties", backupDir+"/permissions.json", backupDir+"/allowlist.json", bedrockServerDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal("Error copying files from backup")
+	}
+
+	//Create tar ball of the backup directory then delete the original
+	fmt.Println("Creating tar ball of backup dir")
+	cmd = exec.Command("sh", "-c", "tar -czvf "+backupDir+".tar.gz "+backupDir+" && rm -rf "+backupDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal("Error creating tar ball")
+	}
 
 	//Deleting the downloaded bedrock zip
 	err = os.RemoveAll(latestServerDir)
@@ -158,7 +175,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	//Update the current version in vers.txt
-	f, err = os.OpenFile(homeDir+"/mc-bedrock-autoupdater/vers.txt", os.O_CREATE|os.O_WRONLY, 0666)
+	f, err = os.OpenFile(homeDir+"/mc-bedrock-autoupdater/vers.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Fatal("Error opening the version file", err)
 	}
@@ -172,6 +189,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 }
+
 func checkForUpdates() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -182,11 +200,10 @@ func checkForUpdates() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	log.SetOutput(f)
 
-	client := &http.Client{}
 	//Send GET request with user headers(Request won't work without headers set)
+	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://www.minecraft.net/en-us/download/server/bedrock", nil)
 	if err != nil {
 		log.Fatal(err)
@@ -208,7 +225,7 @@ func checkForUpdates() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//regex to find latest version in the body
+	//regex to find latest version in the response body
 	latestVersionZipRegex := regexp.MustCompile(`bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
 	latestVersionZip := latestVersionZipRegex.FindString(string(body))
 	if latestVersionZip == "" {
@@ -216,10 +233,12 @@ func checkForUpdates() {
 	}
 
 	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "bedrock-server-"), ".zip")
-
 	installedVers, err := os.ReadFile(homeDir + "/mc-bedrock-autoupdater/vers.txt")
 	if err != nil {
 		log.Fatal(err)
+	}
+	if string(installedVers) == "" {
+		log.Fatal("Set the installed minecraft version in vers.txt", err)
 	}
 
 	//Check if the bedrock server needs to be updated and log it to the log.txt file
