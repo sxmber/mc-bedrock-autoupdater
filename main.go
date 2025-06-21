@@ -20,7 +20,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	latestVersTrim := strings.TrimSuffix(strings.TrimPrefix(latestVersZip, "bedrock-server-"), ".zip")
 
 	//Set the logger to send errors to log.txt
-	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	f, err := os.OpenFile(homeDir+"/mc-be-logs/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal("Error opening log file", err)
 	}
@@ -175,7 +175,7 @@ func updateServer(latestVersZip string, homeDir string) {
 	}
 
 	//Update the current version in vers.txt
-	f, err = os.OpenFile(homeDir+"/mc-bedrock-autoupdater/vers.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+	f, err = os.OpenFile(homeDir+"/mc-be-logs/vers.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Fatal("Error opening the version file", err)
 	}
@@ -196,7 +196,7 @@ func checkForUpdates() {
 		log.Fatal("Error getting the user home directory", err)
 	}
 	//open the log file and set the logger to it
-	f, err := os.OpenFile(homeDir+"/mc-bedrock-autoupdater/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	f, err := os.OpenFile(homeDir+"/mc-be-logs/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func checkForUpdates() {
 	}
 
 	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "bedrock-server-"), ".zip")
-	installedVers, err := os.ReadFile(homeDir + "/mc-bedrock-autoupdater/vers.txt")
+	installedVers, err := os.ReadFile(homeDir + "/mc-be-logs/vers.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
