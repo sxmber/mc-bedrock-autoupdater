@@ -35,7 +35,7 @@ chmod +x initial.sh
 go install
 ```
 
-  5. **Write your Minecraft Bedrock Server into ~/mc-be-logs/vers.txt**
+  5. **Write your Minecraft Bedrock Server version into ~/mc-be-logs/vers.txt**
 
 6. **Run the binary manually OR configure a cronjob to do it automatically**
 
