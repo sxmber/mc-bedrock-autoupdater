@@ -226,13 +226,15 @@ func checkForUpdates() {
 		log.Fatal(err)
 	}
 	//regex to find latest version in the response body
-	latestVersionZipRegex := regexp.MustCompile(`/bin-linux/bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
+	latestVersionZipRegex := regexp.MustCompile(`bedrock-server-\d*\.*\d*\.\d*\.\d*\.zip`)
 	latestVersionZip := latestVersionZipRegex.FindString(string(body))
+
 	if latestVersionZip == "" {
 		log.Fatal("Could not find the latest version zip in the response")
 	}
 
 	latestVersion := strings.TrimSuffix(strings.TrimPrefix(latestVersionZip, "/bin-linux/bedrock-server-"), ".zip")
+
 	installedVers, err := os.ReadFile(homeDir + "/mc-be-logs/vers.txt")
 	if err != nil {
 		log.Fatal(err)
